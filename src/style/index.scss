@@ -1,0 +1,338 @@
+// adaptive font
+$maxWidth: 1280;
+@mixin adaptiv-property($property, $pcSize, $mobSize, $units) {
+  $addSize: $pcSize - $mobSize;
+  $addMobSize: $addSize + $addSize * 0.7;
+  @media (max-width: 767px) {
+    #{$property}: calc(#{$mobSize + $units} + #{$addMobSize} * ((100vw - 320px) / #{$maxWidth}));
+  }
+  @media (min-width: 767px) {
+    #{$property}: calc(#{$mobSize + $units} + #{$addSize} * (100vw / #{$maxWidth}));
+  }
+  @media (min-width: #{$maxWidth + $units}) {
+    #{$property}: #{$pcSize + $units};
+  }
+}
+
+/*Обнуление*/
+//
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+*,
+*:before,
+*:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+:focus,
+:active {
+  outline: none;
+}
+a:focus,
+a:active {
+  outline: none;
+}
+
+nav,
+footer,
+header,
+aside {
+  display: block;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-size: 100%;
+  line-height: 1;
+  font-size: 16px;
+  -ms-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+input,
+button,
+textarea {
+  font-family: inherit;
+}
+
+input::-ms-clear {
+  display: none;
+}
+button {
+  cursor: pointer;
+}
+button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+a,
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+ul li {
+  list-style: none;
+}
+img {
+  vertical-align: top;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: 400;
+}
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+/*--------------------*/
+
+body {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 600;
+  padding: 0 5px;
+  overflow: auto;
+
+  &.hidden {
+    overflow: hidden;
+  }
+}
+
+$orange: rgb(250, 123, 33);
+$green: rgb(151, 255, 60);
+$blue: rgb(60, 255, 242);
+$burgerShowWidth: 600px;
+
+._container {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  background-color: #e0e0e0;
+  .header__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 50px;
+    .header__logo {
+      display: flex;
+      align-items: center;
+      transition: 0.3s;
+      color: #000;
+      cursor: pointer;
+      .header-logo__img {
+        width: 40px;
+        margin-right: 5px;
+      }
+      .header-logo__text {
+        @include adaptiv-property('font-size', 20, 16, 'px');
+      }
+      &:hover {
+        color: $orange;
+      }
+    }
+    .header__nav {
+    }
+    .header__burger-menu {
+      width: 40px;
+      height: 20px;
+      margin: 0 5px;
+      display: none;
+      position: relative;
+      cursor: pointer;
+      transition: 0.3s;
+      span {
+        position: absolute;
+        left: 0;
+        background-color: $orange;
+        width: 100%;
+        height: 3px;
+        display: block;
+
+        &:nth-child(1) {
+          top: 0;
+        }
+        &:nth-child(2) {
+          top: 50%;
+          transform: translate(0, -50%);
+        }
+        &:nth-child(3) {
+          bottom: 0;
+        }
+      }
+      &:hover {
+        box-shadow: 1px 1px 2px 1px #929292;
+      }
+      @media (max-width: $burgerShowWidth) {
+        display: block;
+      }
+    }
+  }
+}
+
+.nav {
+  position: relative;
+  .nav__list {
+    display: flex;
+    padding: 0 10px;
+    .nav__item {
+      &:not(:last-child) {
+        margin-right: 2ч0px;
+      }
+      .nav__link {
+        cursor: pointer;
+        transition: 0.3s;
+        color: #000;
+        @include adaptiv-property('font-size', 18, 14, 'px');
+        &.active {
+          color: $orange;
+          opacity: 0.55;
+        }
+        &:hover {
+          color: $orange;
+        }
+      }
+    }
+  }
+  @media (max-width: $burgerShowWidth) {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    pointer-events: none;
+    transform: translate(100%, 0);
+    background-color: $green;
+    transition: 0.3s;
+    padding-top: 10px;
+    width: 100px;
+    .nav__list {
+      flex-direction: column;
+      height: 100vh;
+      transition: 0.3s;
+      align-items: center;
+
+      .nav__item {
+        text-align: center;
+        &:not(:last-child) {
+          margin-right: 0px;
+          margin-bottom: 8px;
+        }
+      }
+    }
+    .nav__cross {
+      display: block;
+    }
+    &.active {
+      transform: translate(0, 0);
+      pointer-events: all;
+    }
+  }
+}
+
+.signInBlock {
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  .signInBlock__container {
+    max-width: 500px;
+    width: 100%;
+    background-color: #f0eeee;
+    border: 2px solid $blue;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 4px 4px 5px 0px $green;
+
+    .signInBlock__title {
+      @include adaptiv-property('font-size', 25, 18, 'px');
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5em;
+    }
+    .signInBlock__notFoundUser {
+      @include adaptiv-property('font-size', 20, 14, 'px');
+      font-weight: 700;
+      margin-bottom: 0.5em;
+      color: red;
+    }
+    .signInBlock__content {
+      margin-bottom: 1em;
+      .signInBlock-content__input {
+        .signInBlock-content__title {
+          @include adaptiv-property('font-size', 20, 14, 'px');
+          margin-bottom: 0.2em;
+          font-weight: 600;
+
+          &::after {
+            content: attr(data-error);
+            color: red;
+            margin-left: 3em;
+            @include adaptiv-property('font-size', 16, 12, 'px');
+          }
+        }
+        input {
+          padding: 10px 5px;
+          background-color: inherit;
+          border: 2px solid $blue;
+          border-radius: 10px;
+          font-size: 16px;
+          max-width: 250px;
+          width: 100%;
+          font-weight: 600;
+        }
+        &:not(:last-child) {
+          margin-bottom: 2em;
+        }
+      }
+    }
+    .signInBlock__submit {
+      background-color: $orange;
+      color: #fff;
+      padding: 7px;
+      border-radius: 10px;
+      font-weight: 500;
+      @include adaptiv-property('font-size', 20, 12, 'px');
+      transition: 0.3s;
+      display: inline-block;
+      margin-right: 10px;
+      transition: 0.3s;
+      &:disabled {
+        background-color: #868686;
+        cursor: not-allowed;
+      }
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+    .signInBlock__sign-up {
+      display: inline-block;
+      color: #fff;
+      border-radius: 10px;
+      padding: 7px;
+      font-weight: 500;
+      @include adaptiv-property('font-size', 20, 12, 'px');
+
+      background-color: $orange;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+}
