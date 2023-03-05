@@ -15,10 +15,8 @@ type NavProps = {
 export const Nav: FC<NavProps> = ({ burgerIsActive, setBurgerIsActive }) => {
   const navItems: NavItemType[] = [
     { item: 'Главная', link: '/' },
-    { item: 'Войти', link: '/SignIn' },
-    { item: 'И еще', link: '/r' },
   ];
-
+  const isUserVerified = useAppSelector((state) => state.user.verified);
   const userRole = useAppSelector((state) => state.user.role);
   return (
     <nav
@@ -32,13 +30,23 @@ export const Nav: FC<NavProps> = ({ burgerIsActive, setBurgerIsActive }) => {
             </NavLink>
           </li>
         ))}
-        {userRole === 'mainAdmin' && (
+        {userRole > 1 && (
           <li className="nav__item">
             <NavLink
               to="/createArticle"
               className="nav__link"
               onClick={() => setBurgerIsActive(false)}>
               Создать статью
+            </NavLink>
+          </li>
+        )}
+        {!isUserVerified && (
+          <li className="nav__item">
+            <NavLink
+              to="/SignIn"
+              className="nav__link"
+              onClick={() => setBurgerIsActive(false)}>
+              Войти
             </NavLink>
           </li>
         )}

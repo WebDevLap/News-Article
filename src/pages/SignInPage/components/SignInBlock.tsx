@@ -1,9 +1,21 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { setUserName, setUserRole } from '../../../store/slices/userSlice';
+import { setUserName, setUserRole, setUserVerified } from '../../../store/slices/userSlice';
 import { useDispatch } from 'react-redux/es/exports';
-import { useAppSelector } from '../../../store/store';
 import { NavLink } from 'react-router-dom';
+
+// click on glass near input
+export const glassClick = (element: HTMLInputElement | null) => {
+  if (!element) return;
+  switch (element.type) {
+    case 'password':
+      element.type = 'text';
+      break;
+    case 'text':
+      element.type = 'password';
+      break;
+  }
+};
 
 export const SignInBlock: FC = () => {
   const dispatch = useDispatch();
@@ -19,6 +31,8 @@ export const SignInBlock: FC = () => {
   const [formIsValid, setFormIsValid] = useState<boolean>(false);
   const [formError, setFormError] = useState<string>('');
   const [temporaryUser, setTemporaryUser] = useState();
+
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const re =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -79,17 +93,15 @@ export const SignInBlock: FC = () => {
         console.log(temporaryUser);
         if (temporaryUser['password'] === password) {
           setFormError('');
-          dispatch(
-            setUserName({
-              name: temporaryUser['name'],
-            }),
-          );
+          dispatch(setUserName(temporaryUser['name']));
           dispatch(setUserRole(temporaryUser['role']));
+          dispatch(setUserVerified(true));
         } else {
           setFormError('Неправильный логин или пароль');
         }
       });
   }
+  // passwordInputRef?.current
 
   return (
     <div className="signInBlock">
@@ -97,12 +109,11 @@ export const SignInBlock: FC = () => {
         <h2 className="signInBlock__title">Войти</h2>
         <div className="signInBlock__notFoundUser">{formError}</div>
         <div className="signInBlock__content">
+          <h3 className="signInBlock-content__title" data-error={errorMail}>
+            Почта
+          </h3>
           <div className="signInBlock-content__input">
-            <h3 className="signInBlock-content__title" data-error={errorMail}>
-              Почта
-            </h3>
             <input
-              type="text"
               value={mail}
               onChange={(e) => mailInputChange(e)}
               onBlur={(e) => mailInputBlue(e)}
@@ -112,24 +123,26 @@ export const SignInBlock: FC = () => {
           </div>
         </div>
         <div className="signInBlock__content">
+          <h3 className="signInBlock-content__title" data-error={errorPassword}>
+            Пароль
+          </h3>
           <div className="signInBlock-content__input">
-            <h3 className="signInBlock-content__title" data-error={errorPassword}>
-              Пароль
-            </h3>
             <input
-              type="text"
+              type="password"
               value={password}
               onChange={(e) => passwordInputChange(e)}
               onBlur={(e) => passwordInputBlue(e)}
               onFocus={(e) => setErrorPassword('')}
               name="password"
+              ref={passwordInputRef}
             />
+            <div className="glass" onClick={() => glassClick(passwordInputRef?.current)}></div>
           </div>
         </div>
         <button className="signInBlock__submit" disabled={!formIsValid} onClick={onSubmitClick}>
           Отправить
         </button>
-        <NavLink to='/signUp' className="signInBlock__sign-up">
+        <NavLink to="/signUp" className="signInBlock__submit">
           Зарегистрироваться
         </NavLink>
       </div>
