@@ -3,11 +3,13 @@ import axios from 'axios';
 import { setUserName, setUserRole, setUserVerified } from '../../../store/slices/userSlice';
 import { useDispatch } from 'react-redux/es/exports';
 import { NavLink } from 'react-router-dom';
+import { WaitModal } from '../../../components/WaitModal/WaitModal';
+import { useAppSelector } from '../../../store/store';
 
 // click on glass near input
 export const glassClick = (element: HTMLInputElement | null) => {
   if (!element) return;
-  switch (element.type) {
+  switch (element?.type) {
     case 'password':
       element.type = 'text';
       break;
@@ -30,9 +32,10 @@ export const SignInBlock: FC = () => {
 
   const [formIsValid, setFormIsValid] = useState<boolean>(false);
   const [formError, setFormError] = useState<string>('');
-  const [temporaryUser, setTemporaryUser] = useState();
 
   const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  const [isWaiting, setIsWaiting] = useState<boolean>(false);
 
   const re =
     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -84,28 +87,32 @@ export const SignInBlock: FC = () => {
   }
 
   function onSubmitClick() {
+    setIsWaiting(true);
     axios
       .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${mail}`)
       .then((res) => res.data)
-      .then((json) => setTemporaryUser(json[0]))
-      .then(() => {
-        if (!temporaryUser) return;
-        console.log(temporaryUser);
-        if (temporaryUser['password'] === password) {
+      .then((json) => {
+        if (!json.length) {
+          setFormError('Неправильный логин или пароль');
+          return;
+        }
+        if (json[0]['password'] === password) {
           setFormError('');
-          dispatch(setUserName(temporaryUser['name']));
-          dispatch(setUserRole(temporaryUser['role']));
+          dispatch(setUserName(json[0]['name']));
+          dispatch(setUserRole(json[0]['role']));
           dispatch(setUserVerified(true));
         } else {
           setFormError('Неправильный логин или пароль');
         }
-      });
+      })
+      .then(() => setIsWaiting(false));
   }
-  // passwordInputRef?.current
+
 
   return (
     <div className="signInBlock">
       <div className="signInBlock__container">
+        <WaitModal state={isWaiting} />
         <h2 className="signInBlock__title">Войти</h2>
         <div className="signInBlock__notFoundUser">{formError}</div>
         <div className="signInBlock__content">
@@ -117,7 +124,7 @@ export const SignInBlock: FC = () => {
               value={mail}
               onChange={(e) => mailInputChange(e)}
               onBlur={(e) => mailInputBlue(e)}
-              onFocus={(e) => setErrorMail('')}
+              onFocus={() => setErrorMail('')}
               name="mail"
             />
           </div>

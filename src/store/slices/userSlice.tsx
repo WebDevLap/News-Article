@@ -1,14 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { getUserDataLS } from '../../utils/getUserDataLS';
 
 type userSliceState = {
   name: string;
   role: number;
   verified: boolean;
+  allRoles: string[];
 };
+
 const initialState: userSliceState = {
-  name: '',
-  role: 0,
-  verified: false,
+  name: getUserDataLS('userName', ''),
+  role: getUserDataLS('userRole', 0),
+  verified: getUserDataLS('userVerified', false),
+  allRoles: [
+    'Не авторизованный',
+    'Пользователь',
+    'Писатель',
+    'Модератор',
+    'Адменистратор',
+    'Главный админестратор',
+  ],
 };
 
 const userSlice = createSlice({
@@ -23,8 +34,8 @@ const userSlice = createSlice({
     },
     setUserVerified: (state, action: PayloadAction<boolean>) => {
       state.verified = action.payload;
-    }
+    },
   },
 });
-export const { setUserName,  setUserRole, setUserVerified} = userSlice.actions;
+export const { setUserName, setUserRole, setUserVerified } = userSlice.actions;
 export default userSlice.reducer;

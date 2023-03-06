@@ -1,9 +1,10 @@
 import { FC } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAppSelector } from '../../../store/store';
+import { AdminPanel } from '../../AdminPanel/AdminPanel';
 
 type NavItemType = {
-  item: string;
+  item: string | JSX.Element;
   link: string;
 };
 
@@ -15,6 +16,7 @@ type NavProps = {
 export const Nav: FC<NavProps> = ({ burgerIsActive, setBurgerIsActive }) => {
   const navItems: NavItemType[] = [
     { item: 'Главная', link: '/' },
+    { item: 'Настройки', link: '/settings' },
   ];
   const isUserVerified = useAppSelector((state) => state.user.verified);
   const userRole = useAppSelector((state) => state.user.role);
@@ -23,6 +25,13 @@ export const Nav: FC<NavProps> = ({ burgerIsActive, setBurgerIsActive }) => {
       className={burgerIsActive ? 'header__nav nav active' : 'header__nav nav'}
       onClick={(e) => e.stopPropagation()}>
       <ul className="nav__list">
+        {userRole > 1 && (
+          <li className="nav__item">
+            <div>
+              <AdminPanel setBurgerIsActive={setBurgerIsActive}/>
+            </div>
+          </li>
+        )}
         {navItems.map((item, index) => (
           <li className="nav__item" key={index}>
             <NavLink to={item.link} className="nav__link" onClick={() => setBurgerIsActive(false)}>
@@ -30,22 +39,10 @@ export const Nav: FC<NavProps> = ({ burgerIsActive, setBurgerIsActive }) => {
             </NavLink>
           </li>
         ))}
-        {userRole > 1 && (
-          <li className="nav__item">
-            <NavLink
-              to="/createArticle"
-              className="nav__link"
-              onClick={() => setBurgerIsActive(false)}>
-              Создать статью
-            </NavLink>
-          </li>
-        )}
+
         {!isUserVerified && (
           <li className="nav__item">
-            <NavLink
-              to="/SignIn"
-              className="nav__link"
-              onClick={() => setBurgerIsActive(false)}>
+            <NavLink to="/SignIn" className="nav__link" onClick={() => setBurgerIsActive(false)}>
               Войти
             </NavLink>
           </li>

@@ -1,9 +1,14 @@
 import axios from 'axios';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import { glassClick } from '../../SignInPage/components/SignInBlock';
+import { WaitModal } from '../../../components/WaitModal/WaitModal';
+import { setUserName, setUserRole, setUserVerified } from '../../../store/slices/userSlice';
+import { useDispatch } from 'react-redux';
 
 export const SignUpBlock = () => {
+  const dispatch = useDispatch();
+
   const passwordInput1Ref = useRef<HTMLInputElement>(null);
   const passwordInput2Ref = useRef<HTMLInputElement>(null);
 
@@ -19,9 +24,13 @@ export const SignUpBlock = () => {
   const [mailErrorText, setMailErrorText] = useState<string>('');
   const [mailIsError, setMailIsError] = useState<boolean>(true);
 
-  const [formError, setFormError] = useState('')
+  const [formError, setFormError] = useState('');
   const [formIsValid, setFormIsValid] = useState<boolean>(false);
-  const [isntSoAccount, setIsntSoAccount] = useState<boolean>(false)
+  const [isntSoAccount, setIsntSoAccount] = useState<boolean>(false);
+
+  const [nameInput, setNameInput] = useState<string>('');
+
+  const [isWaiting, setIsWaiting] = useState<boolean>(false);
 
   useEffect(() => {
     if (passwordIsError1 || passwordIsError2 || mailIsError) {
@@ -74,42 +83,54 @@ export const SignUpBlock = () => {
     } else {
       setMailIsError(true);
       setMailErrorText('Некорректная почта');
-      if(!e.target.value.length) setMailErrorText('Поле пустое');
+      if (!e.target.value.length) setMailErrorText('Поле пустое');
     }
   }
 
-  function onSubmitClick(){
-    if(!formIsValid) return;
-    axios
-      .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${mailInput}`)
-      .then(res => res.data)
-      .then(json => {
-        if(json.length){
-          setFormError('Аккаунт с такой почтой уже создан');
-          setIsntSoAccount(false);
-        } else if(passwordInput1 !== passwordInput2){
-          setFormError('Пароли не совпадают');
-          setIsntSoAccount(false);
-        } else{
-          setFormError('');
-          setIsntSoAccount(true);
-        }
-      })
-
-    if(isntSoAccount){
+  useEffect(() => {
+    if (isntSoAccount) {
       axios
         .post('https://6403387ef61d96ac487a1e4d.mockapi.io/users', {
           mail: mailInput,
           password: passwordInput1,
-          name: "Some",
+          name: nameInput,
           role: 1,
         })
+        .then(() => {
+          dispatch(setUserName(nameInput));
+          dispatch(setUserRole(1));
+          dispatch(setUserVerified(true));
+        })
+        .then(() => setIsWaiting(false));
     }
+  }, [isntSoAccount]);
+
+  function onSubmitClick() {
+    if (!formIsValid) return;
+    setIsWaiting(true);
+    axios
+      .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${mailInput}`)
+      .then((res) => res.data)
+      .then((json) => {
+        if (json.length) {
+          setFormError('Аккаунт с такой почтой уже создан');
+          setIsntSoAccount(false);
+          setIsWaiting(false);
+        } else if (passwordInput1 !== passwordInput2) {
+          setFormError('Пароли не совпадают');
+          setIsntSoAccount(false);
+          setIsWaiting(false);
+        } else {
+          setFormError('');
+          setIsntSoAccount(true);
+        }
+      });
   }
 
   return (
     <div className="signInBlock">
       <div className="signInBlock__container">
+        <WaitModal state={isWaiting} />
         <h2 className="signInBlock__title">Зарегистрироваться</h2>
         <div className="signInBlock__notFoundUser">{formError}</div>
         <div className="signInBlock__content">
@@ -123,6 +144,12 @@ export const SignUpBlock = () => {
               onFocus={mailFocus}
               onBlur={(e) => mailBlur(e)}
             />
+          </div>
+        </div>
+        <div className="signInBlock__content">
+          <h3 className="signInBlock-content__title">Имя</h3>
+          <div className="signInBlock-content__input">
+            <input onChange={(e) => setNameInput(e.target.value)} value={nameInput} />
           </div>
         </div>
         <div className="signInBlock__content">
