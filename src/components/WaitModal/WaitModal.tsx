@@ -6,23 +6,6 @@ interface IWaitingModal {
 
 export const WaitModal: FC<IWaitingModal> = ({state}) => {
 
-  useEffect(() => {
-    if(state){
-      document.body.classList.add('poinerEventsNone')
-      document.body.classList.add('hidden')
-    } else{
-      document.body.classList.remove('poinerEventsNone')
-      document.body.classList.remove('hidden')
-    }
-
-    function removeAllClassList(){
-      document.body.classList.remove('poinerEventsNone')
-      document.body.classList.remove('hidden')
-    }
-
-    return removeAllClassList()
-  }, [state])
-
   return (
     <div className={state ? "waitModal active" : "waitModal"}>
       <div className="waitModal__container">

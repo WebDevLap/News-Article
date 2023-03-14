@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useAppSelector } from '../../../store/store';
-import { setUserName, setUserRole, setUserVerified } from '../../../store/slices/userSlice';
+import { userExit } from '../../../store/slices/userSlice';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
@@ -13,11 +13,9 @@ export const ProfileBlock: FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  function outWithAccount() {
-    dispatch(setUserName(''));
-    dispatch(setUserRole(0));
-    dispatch(setUserVerified(false));
-    alert('Вы вышли с аккаунта');
+  function onExitClick() {
+    dispatch(userExit());
+    localStorage.removeItem('userData')
     navigate('/');
   }
 
@@ -36,17 +34,28 @@ export const ProfileBlock: FC = () => {
                 {item}
               </span>
             ))}
-            <div className="profileBlock-item__title"><span className="link">Нажмите</span> чтобы увидеть больше информации</div>
           </div>
           <div className="profileBlock__item">
             <div className="profileBlock-item__title">
-              Вы можете: <NavLink to='/signIn' className="link">войти</NavLink> или{' '}
-              <NavLink to='/signUp' className="link">зарегистрироваться</NavLink>
+              <span className="link">Нажмите</span> чтобы увидеть больше информации о ролевых
+              системах
+            </div>
+          </div>
+          <div className={userVerified ? 'profileBlock__item disNone' : 'profileBlock__item'}>
+            <div className="profileBlock-item__title">
+              Вы можете:
+              <NavLink to="/signIn" className="link">
+                войти
+              </NavLink>
+              <span> или </span>
+              <NavLink to="/signUp" className="link">
+                зарегистрироваться
+              </NavLink>
             </div>
           </div>
           <div className={userVerified ? 'profileBlock__item' : 'profileBlock__item disNone'}>
             <div className="profileBlock-item__title">
-              <span className="link" onClick={outWithAccount}>
+              <span className="link" onClick={onExitClick}>
                 Выйти
               </span>{' '}
               из аккаунта

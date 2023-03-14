@@ -1,187 +1,160 @@
-import axios from 'axios';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { glassClick } from '../../SignInPage/components/SignInBlock';
 import { WaitModal } from '../../../components/WaitModal/WaitModal';
-import { setUserName, setUserRole, setUserVerified } from '../../../store/slices/userSlice';
 import { useDispatch } from 'react-redux';
+import {
+  dirtyBlur,
+  dirtyFocus,
+  glassClick,
+  onEmailChange,
+  onPasswordChange,
+  onNicknameChange,
+} from '../../../utils/signUtils';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export const SignUpBlock = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const passwordInput1Ref = useRef<HTMLInputElement>(null);
-  const passwordInput2Ref = useRef<HTMLInputElement>(null);
+  const passwordInput1Ref = React.useRef<HTMLInputElement>(null);
+  const passwordInput2Ref = React.useRef<HTMLInputElement>(null);
 
-  const [passwordInput1, setPasswordInput1] = useState<string>('');
-  const [passwordErrorText1, setPasswordErrorText1] = useState<string>('');
-  const [passwordIsError1, setPasswordIsError1] = useState<boolean>(true);
+  const [email, setEmail] = React.useState<string>('');
+  const [emailError, setEmailError] = React.useState<string>('Некорректная почта');
+  const [emailDirty, setEmailDirty] = React.useState<boolean>(false);
 
-  const [passwordInput2, setPasswordInput2] = useState<string>('');
-  const [passwordErrorText2, setPasswordErrorText2] = useState<string>('');
-  const [passwordIsError2, setPasswordIsError2] = useState<boolean>(true);
+  const [nickname, setNickname] = React.useState<string>('');
+  const [nicknameError, setNicknameError] = React.useState<string>('Некорректный никнейм');
+  const [nicknameDirty, setNicknameDirty] = React.useState<boolean>(false);
 
-  const [mailInput, setMailInput] = useState<string>('');
-  const [mailErrorText, setMailErrorText] = useState<string>('');
-  const [mailIsError, setMailIsError] = useState<boolean>(true);
+  const [password1, setPassword1] = React.useState<string>('');
+  const [password1Error, setPassword1Error] = React.useState<string>('Некорректный пароль');
+  const [password1Dirty, setPassword1Dirty] = React.useState<boolean>(false);
 
-  const [formError, setFormError] = useState('');
-  const [formIsValid, setFormIsValid] = useState<boolean>(false);
-  const [isntSoAccount, setIsntSoAccount] = useState<boolean>(false);
+  const [password2, setPassword2] = React.useState<string>('');
+  const [password2Error, setPassword2Error] = React.useState<string>('Некорректный пароль');
+  const [password2Dirty, setPassword2Dirty] = React.useState<boolean>(false);
 
-  const [nameInput, setNameInput] = useState<string>('');
+  const [formIsValid, setFormIsValid] = React.useState<boolean>(false);
+  const [formError, setFormError] = React.useState<string>('');
+  const [waitModal, setWaitModal] = React.useState<boolean>(false);
 
-  const [isWaiting, setIsWaiting] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (passwordIsError1 || passwordIsError2 || mailIsError) {
+  React.useEffect(() => {
+    if (emailError || nicknameError || password1Error || password2Error) {
       setFormIsValid(false);
     } else {
       setFormIsValid(true);
     }
-  }, [passwordIsError1, passwordIsError2, mailIsError]);
-
-  function passwordInputChange(e: any, setStater: any, inputIsValider: any) {
-    setStater(e.target.value);
-    if (e.target.value.length < 7) {
-      // setPasswordIsError1(false);
-      inputIsValider(true);
-    } else {
-      inputIsValider(false);
-    }
-  }
-  function passwordInputBlur(e: any, setStater: any, inputIsValider: any) {
-    if (e.target.value.length < 7) {
-      setStater('Кол-во символов меньше 7');
-      inputIsValider(true);
-      if (!e.target.value) {
-        setStater('Поле пустое');
-      }
-    } else {
-      inputIsValider(false);
-    }
-  }
-
-  const re =
-    /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-
-  function mailChange(e: any) {
-    setMailInput(e.target.value);
-    if (re.test(String(e.target.value).toLowerCase())) {
-      setMailIsError(false);
-    } else {
-      setMailIsError(true);
-    }
-  }
-
-  function mailFocus() {
-    setMailErrorText('');
-  }
-  function mailBlur(e: any) {
-    if (re.test(String(mailInput).toLowerCase())) {
-      setMailIsError(false);
-      setMailErrorText('');
-    } else {
-      setMailIsError(true);
-      setMailErrorText('Некорректная почта');
-      if (!e.target.value.length) setMailErrorText('Поле пустое');
-    }
-  }
-
-  useEffect(() => {
-    if (isntSoAccount) {
-      axios
-        .post('https://6403387ef61d96ac487a1e4d.mockapi.io/users', {
-          mail: mailInput,
-          password: passwordInput1,
-          name: nameInput,
-          role: 1,
-        })
-        .then(() => {
-          dispatch(setUserName(nameInput));
-          dispatch(setUserRole(1));
-          dispatch(setUserVerified(true));
-        })
-        .then(() => setIsWaiting(false));
-    }
-  }, [isntSoAccount]);
+  }, [emailError, nicknameError, password1Error, password2Error]);
 
   function onSubmitClick() {
-    if (!formIsValid) return;
-    setIsWaiting(true);
-    axios
-      .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${mailInput}`)
-      .then((res) => res.data)
-      .then((json) => {
-        if (json.length) {
-          setFormError('Аккаунт с такой почтой уже создан');
-          setIsntSoAccount(false);
-          setIsWaiting(false);
-        } else if (passwordInput1 !== passwordInput2) {
-          setFormError('Пароли не совпадают');
-          setIsntSoAccount(false);
-          setIsWaiting(false);
-        } else {
-          setFormError('');
-          setIsntSoAccount(true);
-        }
-      });
+    setWaitModal(true);
+    if (password1 !== password2) {
+      setFormError('Пароли не совпадают');
+      setWaitModal(false);
+      return;
+    }
+    try {
+      axios
+        .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${email}`)
+        .then((res) => res.data)
+        .then((json) => {
+          if (json.length) {
+            setFormError('Аккаунт с такой почтой уже создан');
+            setWaitModal(false);
+          } else {
+            axios
+              .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?name=${nickname}`)
+              .then((res) => res.data)
+              .then((json) => {
+                if (json.length) {
+                  setFormError('Никней должен быть уникальным');
+                  setWaitModal(false);
+                } else {
+                  axios
+                    .post(`https://6403387ef61d96ac487a1e4d.mockapi.io/users`, {
+                      mail: email,
+                      password: password1,
+                      name: nickname,
+                      role: 1,
+                    })
+                    .then(() => {
+                      alert(`Аккаунт с почтой: ${email} успешно создан!`);
+                      navigate('/');
+                    })
+                    .finally(() => {
+                      setWaitModal(false);
+                    });
+                }
+              });
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      setWaitModal(false);
+    }
   }
 
   return (
     <div className="signInBlock">
       <div className="signInBlock__container">
-        <WaitModal state={isWaiting} />
+        <WaitModal state={waitModal} />
         <h2 className="signInBlock__title">Зарегистрироваться</h2>
         <div className="signInBlock__notFoundUser">{formError}</div>
         <div className="signInBlock__content">
-          <h3 className="signInBlock-content__title" data-error={mailErrorText}>
-            Почта
-          </h3>
+          <h3 className="signInBlock-content__title">Почта</h3>
+          <div className={emailDirty ? 'error active' : 'error'}>{emailError}</div>
           <div className="signInBlock-content__input">
             <input
-              value={mailInput}
-              onChange={(e) => mailChange(e)}
-              onFocus={mailFocus}
-              onBlur={(e) => mailBlur(e)}
+              value={email}
+              onChange={(e) => onEmailChange(e, setEmail, setEmailError)}
+              onBlur={() => dirtyBlur(setEmailDirty)}
+              onFocus={() => dirtyFocus(setEmailDirty)}
             />
           </div>
         </div>
         <div className="signInBlock__content">
-          <h3 className="signInBlock-content__title">Имя</h3>
+          <h3 className="signInBlock-content__title">Никнейм на сайте</h3>
+          <div className={nicknameDirty ? 'error active' : 'error'}>{nicknameError}</div>
           <div className="signInBlock-content__input">
-            <input onChange={(e) => setNameInput(e.target.value)} value={nameInput} />
+            <input
+              onChange={(e) => onNicknameChange(e, setNickname, setNicknameError)}
+              value={nickname}
+              onFocus={() => dirtyFocus(setNicknameDirty)}
+              onBlur={() => dirtyBlur(setNicknameDirty)}
+            />
           </div>
         </div>
         <div className="signInBlock__content">
-          <h3 className="signInBlock-content__title" data-error={passwordErrorText1}>
-            Придумайте пароль
-          </h3>
+          <h3 className="signInBlock-content__title">Придумайте пароль</h3>
+          <div className={password1Dirty ? 'error active' : 'error'}>{password1Error}</div>
           <div className="signInBlock-content__input">
             <input
+              type="password"
+              onChange={(e) => onPasswordChange(e, setPassword1, setPassword1Error)}
+              value={password1}
+              onFocus={() => dirtyFocus(setPassword1Dirty)}
+              onBlur={() => dirtyBlur(setPassword1Dirty)}
               ref={passwordInput1Ref}
-              type="password"
-              onChange={(e) => passwordInputChange(e, setPasswordInput1, setPasswordIsError1)}
-              value={passwordInput1}
-              onBlur={(e) => passwordInputBlur(e, setPasswordErrorText1, setPasswordIsError1)}
-              onFocus={() => setPasswordErrorText1('')}
             />
-            <div className="glass" onClick={() => glassClick(passwordInput1Ref.current)}></div>
+            <div className="glass" onClick={() => glassClick(passwordInput1Ref)}></div>
           </div>
         </div>
         <div className="signInBlock__content">
-          <h3 className="signInBlock-content__title" data-error={passwordErrorText2}>
-            Повторите пароль
-          </h3>
+          <h3 className="signInBlock-content__title">Повторите пароль</h3>
+          <div className={password2Dirty ? 'error active' : 'error'}>{password2Error}</div>
+
           <div className="signInBlock-content__input">
             <input
               type="password"
+              onChange={(e) => onPasswordChange(e, setPassword2, setPassword2Error)}
+              value={password2}
+              onFocus={() => dirtyFocus(setPassword2Dirty)}
+              onBlur={() => dirtyBlur(setPassword2Dirty)}
               ref={passwordInput2Ref}
-              onChange={(e) => passwordInputChange(e, setPasswordInput2, setPasswordIsError2)}
-              onBlur={(e) => passwordInputBlur(e, setPasswordErrorText2, setPasswordIsError2)}
-              onFocus={() => setPasswordErrorText2('')}
-              value={passwordInput2}
             />
-            <div className="glass" onClick={() => glassClick(passwordInput2Ref.current)}></div>
+            <div className="glass" onClick={() => glassClick(passwordInput2Ref)}></div>
           </div>
         </div>
         <button className="signInBlock__submit" disabled={!formIsValid} onClick={onSubmitClick}>

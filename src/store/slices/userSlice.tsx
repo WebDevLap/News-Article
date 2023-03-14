@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { getUserDataLS } from '../../utils/getUserDataLS';
+import { getMailFromLS } from '../../utils/getMailFromLS';
 
 type userSliceState = {
   name: string;
@@ -9,16 +9,16 @@ type userSliceState = {
 };
 
 const initialState: userSliceState = {
-  name: getUserDataLS('userName', ''),
-  role: getUserDataLS('userRole', 0),
-  verified: getUserDataLS('userVerified', false),
+  name: '',
+  role: 0,
+  verified: false,
   allRoles: [
     'Не авторизованный',
     'Пользователь',
     'Писатель',
     'Модератор',
     'Адменистратор',
-    'Главный админестратор',
+    'Главный адменистратор',
   ],
 };
 
@@ -35,7 +35,13 @@ const userSlice = createSlice({
     setUserVerified: (state, action: PayloadAction<boolean>) => {
       state.verified = action.payload;
     },
+    userExit: (state) => {
+      state.name = ''
+      state.role = 0
+      state.verified = false
+
+    }
   },
 });
-export const { setUserName, setUserRole, setUserVerified } = userSlice.actions;
+export const { setUserName, setUserRole, setUserVerified, userExit } = userSlice.actions;
 export default userSlice.reducer;

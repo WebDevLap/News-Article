@@ -1,23 +1,75 @@
 import axios from 'axios';
-import { useState } from 'react';
+import React from 'react';
 import { MainCard } from '../../MainPage/components/MainCard';
+import { WaitModal } from '../../../components/WaitModal/WaitModal';
+import { useNavigate, useLocation } from 'react-router-dom';
+import qs from 'qs';
 
 export const CreateArticleForm = () => {
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [title, setTitle] = useState<string>('');
-  const [subtitle, setSubitle] = useState<string>('');
+  const [imageUrl, setImageUrl] = React.useState<string>('');
+  const [title, setTitle] = React.useState<string>('');
+  const [subtitle, setSubitle] = React.useState<string>('');
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [waitModal, setWaitModal] = React.useState<boolean>(false);
+
+  const [stringifeQsIsMounted, setStringifeQsIsMounted] = React.useState<boolean>(false);
 
   function submitCard() {
-    axios.post('https://6403387ef61d96ac487a1e4d.mockapi.io/articles', {
-      titls: title,
-      subtitle: subtitle,
-      imageUrl: imageUrl,
-    }).then(() => alert('Изменения сохранены'))
+    setWaitModal(true);
+
+    try {
+      axios
+        .post('https://6403387ef61d96ac487a1e4d.mockapi.io/articles', {
+          title: title,
+          subtitle: subtitle,
+          imageUrl: imageUrl,
+        })
+        .then(() => {
+          setWaitModal(false);
+          alert('Изменения сохранены');
+          navigate('/');
+        })
+        .catch((err) => {
+          console.log(err);
+          setWaitModal(false);
+          alert('Произошла ошибка при сохранении статьи');
+        });
+    } catch (err) {
+      console.log(err);
+      setWaitModal(false);
+      alert('Произошла ошибка при сохранении статьи');
+    }
   }
+
+  React.useEffect(() => {
+    if (location.search) {
+      const params = qs.parse(location.search.substring(1));
+      setImageUrl(String(params.imageUrl));
+      setTitle(String(params.title));
+      setSubitle(String(params.subtitle));
+      console.log(subtitle, title, imageUrl);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!stringifeQsIsMounted) {
+      setStringifeQsIsMounted(true);
+      return;
+    }
+    const queryString = qs.stringify({
+      imageUrl,
+      title,
+      subtitle,
+    });
+    navigate(`?${queryString}`);
+  }, [imageUrl, title, subtitle]);
 
   return (
     <div className="createArticleForm">
       <div className="createArticleForm__container">
+        <WaitModal state={waitModal} />
         <div className="articleForm">
           <div className="signInBlock__container">
             <h2 className="signInBlock__title">Режим создания статьи</h2>
@@ -25,18 +77,18 @@ export const CreateArticleForm = () => {
             <div className="signInBlock__content">
               <h3 className="signInBlock-content__title">URL картинки</h3>
               <div className="signInBlock-content__input">
-                <input onChange={(e) => setImageUrl(e.target.value)} />
+                <input onChange={(e) => setImageUrl(e.target.value)} value={imageUrl} />
               </div>
             </div>
             <div className="signInBlock__content">
               <h3 className="signInBlock-content__title">Название статьи</h3>
               <div className="signInBlock-content__input">
-                <input onChange={(e) => setTitle(e.target.value)} />
+                <input onChange={(e) => setTitle(e.target.value)} value={title} />
               </div>
             </div>
             <div className="signInBlock__content">
               <h3 className="signInBlock-content__title">Текст для статьи</h3>
-              <textarea onChange={(e) => setSubitle(e.target.value)}></textarea>
+              <textarea onChange={(e) => setSubitle(e.target.value)} value={subtitle}></textarea>
             </div>
             <button className="signInBlock__submit" onClick={submitCard}>
               Отправить

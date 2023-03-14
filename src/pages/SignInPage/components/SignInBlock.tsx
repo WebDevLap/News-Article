@@ -1,152 +1,120 @@
-import { FC, useState, useEffect, useRef } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { setUserName, setUserRole, setUserVerified } from '../../../store/slices/userSlice';
 import { useDispatch } from 'react-redux/es/exports';
 import { NavLink } from 'react-router-dom';
 import { WaitModal } from '../../../components/WaitModal/WaitModal';
-import { useAppSelector } from '../../../store/store';
+import {
+  dirtyBlur,
+  dirtyFocus,
+  glassClick,
+  onEmailChange,
+  onPasswordChange,
+} from '../../../utils/signUtils';
 
-// click on glass near input
-export const glassClick = (element: HTMLInputElement | null) => {
-  if (!element) return;
-  switch (element?.type) {
-    case 'password':
-      element.type = 'text';
-      break;
-    case 'text':
-      element.type = 'password';
-      break;
-  }
-};
-
-export const SignInBlock: FC = () => {
+export const SignInBlock: React.FC = () => {
   const dispatch = useDispatch();
 
-  const [mail, setMail] = useState<string>('');
-  const [errorMail, setErrorMail] = useState<string>('');
-  const [mailIsError, setMailIsError] = useState<boolean>(true);
+  const password1Ref = React.useRef<HTMLInputElement>(null);
 
-  const [password, setPassword] = useState<string>('');
-  const [errorPassword, setErrorPassword] = useState<string>('');
-  const [passwordIsError, setPasswordIsError] = useState<boolean>(true);
+  const [email, setEmail] = React.useState<string>('');
+  const [emailError, setEmailError] = React.useState<string>('Некорректная почта');
+  const [emailDirty, setEmailDirty] = React.useState<boolean>(false);
 
-  const [formIsValid, setFormIsValid] = useState<boolean>(false);
-  const [formError, setFormError] = useState<string>('');
+  const [password, setPassword] = React.useState<string>('');
+  const [passwordError, setPasswordError] = React.useState<string>('Некорректный пароль');
+  const [passwordDirty, setPasswordDirty] = React.useState<boolean>(false);
 
-  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const [formIsValid, setFormIsValid] = React.useState<boolean>(false);
+  const [waitModal, setWaitModal] = React.useState<boolean>(false);
+  const [formError, setFormError] = React.useState<string>('');
 
-  const [isWaiting, setIsWaiting] = useState<boolean>(false);
-
-  const re =
-    /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-
-  useEffect(() => {
-    if (mailIsError || passwordIsError) {
+  React.useEffect(() => {
+    if (emailError.length || passwordError.length) {
       setFormIsValid(false);
     } else {
       setFormIsValid(true);
     }
-  }, [mailIsError, passwordIsError]);
+  }, [emailError, passwordError]);
 
-  function mailInputChange(e: any) {
-    setMail(e.target.value);
-    if (!re.test(String(e.target.value).toLowerCase())) {
-      setMailIsError(true);
-    } else {
-      setMailIsError(false);
+  // PASSWORD EVENTS
+
+  function onPasswordFocus() {
+    setPasswordDirty(false);
+  }
+  function onPasswordBlur() {
+    setPasswordDirty(true);
+  }
+
+  // SUBMIT EVENT
+  function onClickSubmit() {
+    setWaitModal(true);
+
+    try {
+      axios
+        .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${email}`)
+        .then((res) => res.data)
+        .then((json) => {
+          if (!json.length) {
+            setFormError('Неверный логин или пароль');
+            return;
+          }
+          if (!(json[0].password === password)) {
+            setFormError('Неверный логин или пароль');
+            return;
+          }
+          if (json[0].password === password) {
+            const jsons = JSON.stringify({ email });
+            localStorage.setItem('userData', jsons);
+            dispatch(setUserVerified(true));
+            dispatch(setUserName(json[0].name));
+            dispatch(setUserRole(json[0].role));
+          }
+        })
+        .then(() => setWaitModal(false))
+        .catch(() => setWaitModal(false));
+    } catch (err) {
+      console.log(err);
     }
   }
-  function mailInputBlue(e: any) {
-    if (!re.test(String(e.target.value).toLowerCase())) {
-      setErrorMail('Некорректная почта');
-      if (!e.target.value.length) {
-        setErrorMail('Пустое поле');
-      }
-    }
-  }
-
-  function passwordInputChange(e: any) {
-    setPassword(e.target.value);
-    if (e.target.value.length < 6) {
-      setPasswordIsError(true);
-    } else {
-      setPasswordIsError(false);
-    }
-  }
-
-  function passwordInputBlue(e: any) {
-    if (e.target.value.length < 6) {
-      setErrorPassword('Кол-во символов меньше 7');
-      if (!e.target.value.length) {
-        setErrorPassword('Пустое поле');
-      }
-    } else {
-      setErrorPassword('');
-      setPasswordIsError(false);
-    }
-  }
-
-  function onSubmitClick() {
-    setIsWaiting(true);
-    axios
-      .get(`https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${mail}`)
-      .then((res) => res.data)
-      .then((json) => {
-        if (!json.length) {
-          setFormError('Неправильный логин или пароль');
-          return;
-        }
-        if (json[0]['password'] === password) {
-          setFormError('');
-          dispatch(setUserName(json[0]['name']));
-          dispatch(setUserRole(json[0]['role']));
-          dispatch(setUserVerified(true));
-        } else {
-          setFormError('Неправильный логин или пароль');
-        }
-      })
-      .then(() => setIsWaiting(false));
-  }
-
 
   return (
     <div className="signInBlock">
       <div className="signInBlock__container">
-        <WaitModal state={isWaiting} />
+        <WaitModal state={waitModal} />
         <h2 className="signInBlock__title">Войти</h2>
         <div className="signInBlock__notFoundUser">{formError}</div>
         <div className="signInBlock__content">
-          <h3 className="signInBlock-content__title" data-error={errorMail}>
-            Почта
-          </h3>
+          <h3 className="signInBlock-content__title">Почта</h3>
+          <div className={emailDirty ? 'error active' : 'error'}>{emailError}</div>
           <div className="signInBlock-content__input">
             <input
-              value={mail}
-              onChange={(e) => mailInputChange(e)}
-              onBlur={(e) => mailInputBlue(e)}
-              onFocus={() => setErrorMail('')}
               name="mail"
+              value={email}
+              onChange={(e) => onEmailChange(e, setEmail, setEmailError)}
+              onFocus={() => dirtyFocus(setEmailDirty)}
+              onBlur={() => dirtyBlur(setEmailDirty)}
             />
           </div>
         </div>
         <div className="signInBlock__content">
-          <h3 className="signInBlock-content__title" data-error={errorPassword}>
-            Пароль
-          </h3>
+          <h3 className="signInBlock-content__title">Пароль</h3>
+          <div className={passwordDirty ? 'error active' : 'error'}>{passwordError}</div>
+
           <div className="signInBlock-content__input">
             <input
-              type="password"
-              value={password}
-              onChange={(e) => passwordInputChange(e)}
-              onBlur={(e) => passwordInputBlue(e)}
-              onFocus={(e) => setErrorPassword('')}
               name="password"
-              ref={passwordInputRef}
+              type='password'
+              onChange={(e) => onPasswordChange(e, setPassword, setPasswordError)}
+              value={password}
+              onFocus={onPasswordFocus}
+              onBlur={onPasswordBlur}
+              ref={password1Ref}
             />
-            <div className="glass" onClick={() => glassClick(passwordInputRef?.current)}></div>
+            <div className="glass" onClick={() => glassClick(password1Ref)}></div>
           </div>
         </div>
-        <button className="signInBlock__submit" disabled={!formIsValid} onClick={onSubmitClick}>
+        <button className="signInBlock__submit" disabled={!formIsValid} onClick={onClickSubmit}>
           Отправить
         </button>
         <NavLink to="/signUp" className="signInBlock__submit">

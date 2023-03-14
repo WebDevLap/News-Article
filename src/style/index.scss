@@ -112,6 +112,10 @@ body {
   &.poinerEventsNone {
     pointer-events: none;
   }
+  &.waitingMode {
+    overflow: hidden;
+    pointer-events: none;
+  }
 }
 
 $orange: rgb(250, 123, 33);
@@ -286,19 +290,22 @@ $burgerShowWidth: 600px;
     margin-bottom: 1em;
     .signInBlock-content__title {
       @include adaptiv-property('font-size', 20, 18, 'px');
-      margin-bottom: 0.2em;
       font-weight: 600;
       display: flex;
       flex-wrap: wrap;
       margin-right: 1em;
-      &::after {
-        content: attr(data-error);
-        color: red;
+    }
+    .error {
+      color: red;
 
-        @include adaptiv-property('font-size', 18, 14, 'px');
-        width: 100%;
-        white-space: nowrap;
-        overflow: auto;
+      @include adaptiv-property('font-size', 18, 14, 'px');
+      white-space: nowrap;
+      visibility: hidden;
+      overflow: auto;
+      min-height: 18px;
+
+      &.active {
+        visibility: visible;
       }
     }
 
@@ -534,6 +541,7 @@ $burgerShowWidth: 600px;
   align-items: center;
   justify-content: center;
   transition: 0.15s;
+  z-index: 1000;
 
   &.active {
     opacity: 1;
@@ -637,6 +645,12 @@ $burgerShowWidth: 600px;
       .adminPanel__list {
         background-color: $orange;
         color: #fff;
+
+        .adminPanel__item {
+          &:hover {
+            color: $green;
+          }
+        }
       }
     }
   }
@@ -667,11 +681,20 @@ $burgerShowWidth: 600px;
           border-radius: 8px;
           margin: 3px;
           font-size: 14px;
+          transition: 0.2s;
+          cursor: pointer;
+
+          &:hover {
+            background-color: #cbcbcb;
+          }
 
           &.active {
             background-color: $orange;
             opacity: 1;
             font-size: 16px;
+            &:hover {
+              color: #4e4e4e;
+            }
           }
         }
         @media (max-width: 530px) {
