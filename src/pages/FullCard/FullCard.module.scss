@@ -1,0 +1,42 @@
+@use '../../style/variables.scss';
+@use '../../style/mixins.scss';
+@import '../../style/nullStyle.scss';
+
+.fullCard {
+  .fullCard__container {
+    padding-right: 10px;
+    padding-left: 10px;
+    .fullCard__title {
+      text-align: center;
+      @include mixins.adaptiv-property('font-size', 30, 23, 'px');
+      font-weight: 700;
+      margin: 0.5em;
+    }
+    .fullCard__content {
+      .fullCard__image {
+        float: left;
+        max-width: 400px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        background: rgb(12, 0, 255);
+        background: linear-gradient(30deg, rgba(12, 0, 255, 1) 0%, rgba(255, 0, 215, 1) 80%);
+      }
+      .fullCard__subtitle {
+      }
+      @media (max-width: 500px) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .fullCard__image {
+          margin: 10px;
+          width: 75%;
+
+          img {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+@mixin greenWithACanal($prop, $aCanal: 1) {
+  #{$prop}: rgb(151, 255, 60, $aCanal);
+}
+
+// adaptive font
+$maxWidth: 1280;
+@mixin adaptiv-property($property, $pcSize, $mobSize, $units) {
+  $addSize: $pcSize - $mobSize;
+  $addMobSize: $addSize + $addSize * 0.7;
+  @media (max-width: 767px) {
+    #{$property}: calc(#{$mobSize + $units} + #{$addMobSize} * ((100vw - 320px) / #{$maxWidth}));
+  }
+  @media (min-width: 767px) {
+    #{$property}: calc(#{$mobSize + $units} + #{$addSize} * (100vw / #{$maxWidth}));
+  }
+  @media (min-width: #{$maxWidth + $units}) {
+    #{$property}: #{$pcSize + $units};
+  }
+}

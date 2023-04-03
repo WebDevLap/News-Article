@@ -1,0 +1,239 @@
+@use '../../../../style/variables.scss';
+@use '../../../../style/mixins.scss';
+
+.searchForNick {
+  .searchForNick__content {
+    margin-top: 10px;
+    position: relative;
+    // overflow: hidden;
+
+    .searchForNick__title {
+      position: relative;
+      display: inline-block;
+      @include mixins.adaptiv-property('font-size', 22, 19, 'px');
+      padding: 0 5px;
+      .name {
+      }
+      .menu {
+        position: absolute;
+        top: 23px;
+        left: 0;
+        background-color: variables.$orange;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 3px;
+        display: none;
+
+        &.active {
+          display: flex;
+        }
+
+        .menuItem {
+          transition: 0.3s;
+          cursor: pointer;
+
+          &.active {
+            color: #5a5a5a;
+          }
+          &:hover {
+            color: #2c2c2c;
+          }
+        }
+      }
+    }
+
+    .searchForNick__inputArea {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 0 5px;
+      .searchForNick__input {
+        display: inline-flex;
+        border: 2px solid variables.$blue;
+        border-radius: 10px;
+        align-items: center;
+        padding: 5px;
+        max-height: 35px;
+        height: 100%;
+        max-width: 300px;
+        width: 100%;
+        input {
+          background-color: inherit;
+
+          font-size: 16px;
+          // max-width: 350px;
+          width: 100%;
+          font-weight: 600;
+          margin-right: 8px;
+        }
+      }
+    }
+    .searchForNick__input {
+      display: inline-flex;
+      border: 2px solid variables.$blue;
+      border-radius: 10px;
+      align-items: center;
+      padding: 5px;
+      max-height: 35px;
+      height: 100%;
+      max-width: 300px;
+      width: 100%;
+      input {
+        background-color: inherit;
+
+        font-size: 16px;
+        // max-width: 350px;
+        width: 100%;
+        font-weight: 600;
+        margin-right: 8px;
+      }
+    }
+
+    .searchForNick__contextmenu {
+      background-color: variables.$green;
+      border-radius: 3px;
+      position: absolute;
+      padding: 5px;
+      display: none;
+      z-index: 3;
+      max-width: 100vw;
+
+      @media (max-width: 600px) {
+        left: 0 !important;
+      }
+
+      span {
+        color: variables.$orange;
+      }
+
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        button {
+          max-width: 300px;
+          width: 100%;
+          text-align: center;
+          color: variables.$orange;
+          border: 2px solid variables.$orange;
+          background-color: transparent;
+          font-size: 18px;
+          margin-bottom: 5px;
+          font-weight: 700;
+
+          &:disabled {
+            color: variables.$gray;
+            border: 2px solid variables.$gray;
+          }
+        }
+      }
+
+      &.active {
+        display: block;
+      }
+    }
+
+    .searchForNick__users {
+      border: 2px dashed variables.$blue;
+      min-height: 100px;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+      margin-top: 30px;
+      padding: 10px;
+      border-radius: 5px;
+      position: relative;
+
+      .waiting {
+        // display: none;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 5;
+        top: 0;
+        left: 0;
+        background-color: rgba(102, 102, 102, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+        &.active {
+          display: flex;
+        }
+
+        &::before {
+          content: 'Загрузка пользователей...';
+          display: block;
+          background-color: variables.$green;
+          padding: 5px 10px;
+          margin-bottom: 5px;
+        }
+
+        &::after {
+          content: '';
+          display: block;
+          width: 40px;
+          height: 40px;
+          border: 10px solid variables.$green;
+          border-radius: 10px;
+          animation-name: rotating;
+          animation-duration: 2s;
+          animation-iteration-count: infinite;
+        }
+
+        @keyframes rotating {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      }
+
+      &.hidden {
+        display: none;
+      }
+
+      &::before {
+        bottom: 100%;
+        left: 0;
+        content: 'Найденные пользователи';
+        color: #2c2c2c;
+        position: absolute;
+        @include mixins.adaptiv-property('font-size', 20, 16, 'px');
+      }
+
+      .userItem {
+        border: 2px solid variables.$orange;
+        padding: 3px;
+        cursor: pointer;
+        margin-bottom: 5px;
+        .userItem__text {
+          span {
+            color: variables.$orange;
+            font-size: 19px;
+            font-weight: 700px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.btn {
+  background-color: variables.$orange;
+  padding: 5px 10px;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 10px;
+  transition: 0.3s;
+
+  &:disabled {
+    background-color: #757575;
+  }
+}

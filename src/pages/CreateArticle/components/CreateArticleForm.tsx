@@ -14,32 +14,31 @@ export const CreateArticleForm = () => {
   const location = useLocation();
   const [waitModal, setWaitModal] = React.useState<boolean>(false);
 
-  const [stringifeQsIsMounted, setStringifeQsIsMounted] = React.useState<boolean>(false);
+  const [stringifeQsIsMounted, setStringifeQsIsMounted] =
+    React.useState<boolean>(false);
 
-  function submitCard() {
-    setWaitModal(true);
 
+  async function submitCard() {
     try {
-      axios
-        .post('https://6403387ef61d96ac487a1e4d.mockapi.io/articles', {
+      setWaitModal(true);
+      const addArticle = await axios.post(
+        'https://6403387ef61d96ac487a1e4d.mockapi.io/articles',
+        {
           title: title,
           subtitle: subtitle,
           imageUrl: imageUrl,
-        })
-        .then(() => {
-          setWaitModal(false);
-          alert('Изменения сохранены');
-          navigate('/');
-        })
-        .catch((err) => {
-          console.log(err);
-          setWaitModal(false);
-          alert('Произошла ошибка при сохранении статьи');
-        });
-    } catch (err) {
-      console.log(err);
+        },
+      );
       setWaitModal(false);
-      alert('Произошла ошибка при сохранении статьи');
+      alert('Изменения сохранены');
+      navigate('/');
+    } catch (err) {
+      setTimeout(
+        () => alert(`Ошибка! Добавить статью не удалось. код ошибки:\n${err}`),
+        100,
+      );
+    } finally {
+      setWaitModal(false);
     }
   }
 
@@ -77,18 +76,24 @@ export const CreateArticleForm = () => {
             <div className="signInBlock__content">
               <h3 className="signInBlock-content__title">URL картинки</h3>
               <div className="signInBlock-content__input">
-                <input onChange={(e) => setImageUrl(e.target.value)} value={imageUrl} />
+                <input
+                  onChange={e => setImageUrl(e.target.value)}
+                  value={imageUrl}
+                />
               </div>
             </div>
             <div className="signInBlock__content">
               <h3 className="signInBlock-content__title">Название статьи</h3>
               <div className="signInBlock-content__input">
-                <input onChange={(e) => setTitle(e.target.value)} value={title} />
+                <input onChange={e => setTitle(e.target.value)} value={title} />
               </div>
             </div>
             <div className="signInBlock__content">
               <h3 className="signInBlock-content__title">Текст для статьи</h3>
-              <textarea onChange={(e) => setSubitle(e.target.value)} value={subtitle}></textarea>
+              <textarea
+                onChange={e => setSubitle(e.target.value)}
+                value={subtitle}
+              ></textarea>
             </div>
             <button className="signInBlock__submit" onClick={submitCard}>
               Отправить
@@ -96,7 +101,13 @@ export const CreateArticleForm = () => {
           </div>
         </div>
         <div className="showTheArticle">
-          <MainCard title={title} subtitle={subtitle} imageUrl={imageUrl} />
+          <MainCard
+            id="-1"
+            disabled
+            title={title}
+            subtitle={subtitle}
+            imageUrl={imageUrl}
+          />
         </div>
       </div>
     </div>

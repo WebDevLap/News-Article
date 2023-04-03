@@ -8,6 +8,7 @@ type ArticleType = {
   title: string;
   subtitle: string;
   imageUrl: string;
+  id: string;
 };
 
 export const MainPage = () => {
@@ -18,8 +19,8 @@ export const MainPage = () => {
     setIsLoading(true);
     axios
       .get('https://6403387ef61d96ac487a1e4d.mockapi.io/articles')
-      .then((res) => res.data)
-      .then((json) => setArticles(json))
+      .then(res => res.data)
+      .then(json => setArticles(json))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -34,6 +35,7 @@ export const MainPage = () => {
               title={item.title}
               subtitle={item.subtitle}
               imageUrl={item.imageUrl}
+              id={item.id}
             />
           ))
         ) : (

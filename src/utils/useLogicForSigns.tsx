@@ -1,22 +1,26 @@
 import axios from 'axios';
 import { useEffect } from 'react';
-import { setUserName, setUserRole, setUserVerified, userExit } from '../store/slices/userSlice';
+import {
+  setUserName,
+  setUserRole,
+  setUserVerified,
+  userExit,
+} from '../store/slices/userSlice';
 import { useDispatch } from 'react-redux';
 
-export function useLogicForSigns(setWaitModal: (value: boolean) => void) {
+export function useLogicForSigns() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const data = localStorage.getItem('userData');
-    setWaitModal(true)
     axios
       .get(
         `https://6403387ef61d96ac487a1e4d.mockapi.io/users?mail=${
           data && JSON.parse(data)['email']
         }`,
       )
-      .then((res) => res.data)
-      .then((json) => {
+      .then(res => res.data)
+      .then(json => {
         if (!json.length) {
           localStorage.removeItem('userData');
           dispatch(userExit());
@@ -25,7 +29,6 @@ export function useLogicForSigns(setWaitModal: (value: boolean) => void) {
           dispatch(setUserName(json[0].name));
           dispatch(setUserRole(json[0].role));
         }
-      })
-      .finally(() => setWaitModal(false))
+      });
   }, []);
 }

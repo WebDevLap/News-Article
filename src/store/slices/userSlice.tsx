@@ -35,13 +35,13 @@ const userSlice = createSlice({
     setUserVerified: (state, action: PayloadAction<boolean>) => {
       state.verified = action.payload;
     },
-    userExit: (state) => {
-      state.name = ''
-      state.role = 0
-      state.verified = false
-
-    }
+    userExit: state => {
+      state.name = '';
+      state.role = 0;
+      state.verified = false;
+    },
   },
 });
-export const { setUserName, setUserRole, setUserVerified, userExit } = userSlice.actions;
+export const { setUserName, setUserRole, setUserVerified, userExit } =
+  userSlice.actions;
 export default userSlice.reducer;
